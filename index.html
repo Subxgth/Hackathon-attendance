@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Attendance Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .department-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .department-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .calendar-day {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .calendar-day:hover {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .attendance-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Login Section -->
+    <div id="loginSection" class="w-full max-w-md p-8 rounded-2xl login-container">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">College Attendance</h1>
+            <p class="text-gray-600">Administrator & Faculty Portal</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your username">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300">
+                <i class="fas fa-lock-open mr-2"></i>Access Dashboard
+            </button>
+            
+            <div class="text-center text-sm text-gray-500">
+                <p>Secure access for authorized faculty & administrators only</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Dashboard Section (Hidden initially) -->
+    <div id="dashboardSection" class="hidden w-full max-w-7xl">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl p-6 mb-6 flex justify-between items-center shadow-lg">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Attendance Management System</h1>
+                    <p class="text-gray-600">Comprehensive analytics for student engagement</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="font-semibold text-gray-800">Admin User</p>
+                    <p class="text-sm text-gray-600">Faculty Access Level</p>
+                </div>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Department Selection -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <button onclick="selectDepartment('BBA')" class="department-btn bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-4 rounded-xl text-center">
+                <i class="fas fa-chart-line text-2xl mb-2"></i>
+                <h3 class="font-semibold">BBA</h3>
+                <p class="text-sm opacity-90">Business Administration</p>
+            </button>
+            
+            <button onclick="selectDepartment('BCA')" class="department-btn bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-xl text-center">
+                <i class="fas fa-laptop-code text-2xl mb-2"></i>
+                <h3 class="font-semibold">BCA</h3>
+                <p class="text-sm opacity-90">Computer Applications</p>
+            </button>
+            
+            <button onclick="selectDepartment('ECE')" class="department-btn bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-xl text-center">
+                <i class="fas fa-microchip text-2xl mb-2"></i>
+                <h3 class="font-semibold">ECE</h3>
+                <p class="text-sm opacity-90">Electronics Engineering</p>
+            </button>
+            
+            <button onclick="selectDepartment('CSE')" class="department-btn bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-xl text-center">
+                <i class="fas fa-code text-2xl mb-2"></i>
+                <h3 class="font-semibold">CSE</h3>
+                <p class="text-sm opacity-90">Computer Science</p>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Analytics Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Department Overview -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="departmentTitle">Department Overview</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600" id="totalStudents">120</div>
+                            <p class="text-sm text-gray-600">Total Students</p>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600" id="attendanceRate">85%</div>
+                            <p class="text-sm text-gray-600">Attendance Rate</p>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600" id="absentToday">8</div>
+                            <p class="text-sm text-gray-600">Absent Today</p>
+                        </div>
+                        <div class="text-center p-4 bg-red-50 rounded-lg">
+                            <div class="text-2xl font-bold text-red-600" id="lowAttendance">5</div>
+                            <p class="text-sm text-gray-600">Low Attendance</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Class Attendance Graph -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Class Attendance Trend</h2>
+                    <div class="h-64">
+                        <canvas id="classAttendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student Performance -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Student Performance</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-2 text-left">Student</th>
+                                    <th class="px-4 py-2 text-left">ID</th>
+                                    <th class="px-4 py-2 text-left">Attendance</th>
+                                    <th class="px-4 py-2 text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTable">
+                                <!-- Student data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Calendar -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Attendance Calendar</h2>
+                    <div class="text-center mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <button onclick="prevMonth()" class="p-2 hover:bg-gray-100 rounded">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h3 class="font-semibold" id="calendarMonth">November 2024</h3>
+                            <button onclick="nextMonth()" class="p-2 hover:bg-gray-100 rounded">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 mb-1">
+                            <div class="text-center text-sm font-semibold text-gray-600">Sun</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Mon</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Tue</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Wed</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Thu</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Fri</div>
+                            <div class="text-center text-sm font-semibold text-gray-600">Sat</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1" id="calendarDays">
+                            <!-- Calendar days will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Quick Actions</h2>
+                    <div class="space-y-3">
+                        <button class="w-full bg-blue-100 text-blue-700 p-3 rounded-lg text-left hover:bg-blue-200 transition-colors">
+                            <i class="fas fa-qrcode mr-2"></i>Generate QR Code
+                        </button>
+                        <button class="w-full bg-green-100 text-green-700 p-3 rounded-lg text-left hover:bg-green-200 transition-colors">
+                            <i class="fas fa-file-export mr-2"></i>Export Reports
+                        </button>
+                        <button class="w-full bg-purple-100 text-purple-700 p-3 rounded-lg text-left hover:bg-purple-200 transition-colors">
+                            <i class="fas fa-bell mr-2"></i>Send Notifications
+                        </button>
+                        <button class="w-full bg-red-100 text-red-700 p-3 rounded-lg text-left hover:bg-red-200 transition-colors">
+                            <i class="fas fa-cog mr-2"></i>System Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Recent Activity</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Attendance marked for Class A</p>
+                                <p class="text-xs text-gray-500">2 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-user-plus text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">New student registered</p>
+                                <p class="text-xs text-gray-500">15 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-exclamation text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Low attendance alert</p>
+                                <p class="text-xs text-gray-500">1 hour ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for different departments
+        const departmentData = {
+            'BBA': {
+                totalStudents: 120,
+                attendanceRate: '85%',
+                absentToday: 8,
+                lowAttendance: 5,
+                students: [
+                    { name: 'Alice Johnson', id: 'BBA001', attendance: '92%', status: 'Excellent' },
+                    { name: 'Bob Smith', id: 'BBA002', attendance: '78%', status: 'Good' },
+                    { name: 'Carol Williams', id: 'BBA003', attendance: '65%', status: 'Warning' },
+                    { name: 'David Brown', id: 'BBA004', attendance: '95%', status: 'Excellent' },
+                    { name: 'Eva Davis', id: 'BBA005', attendance: '58%', status: 'Critical' }
+                ]
+            },
+            'BCA': {
+                totalStudents: 95,
+                attendanceRate: '88%',
+                absentToday: 6,
+                lowAttendance: 3,
+                students: [
+                    { name: 'Frank Miller', id: 'BCA001', attendance: '89%', status: 'Good' },
+                    { name: 'Grace Wilson', id: 'BCA002', attendance: '94%', status: 'Excellent' },
+                    { name: 'Henry Moore', id: 'BCA003', attendance: '72%', status: 'Good' },
+                    { name: 'Ivy Taylor', id: 'BCA004', attendance: '81%', status: 'Good' },
+                    { name: 'Jack Anderson', id: 'BCA005', attendance: '63%', status: 'Warning' }
+                ]
+            },
+            'ECE': {
+                totalStudents: 110,
+                attendanceRate: '82%',
+                absentToday: 10,
+                lowAttendance: 7,
+                students: [
+                    { name: 'Karen Thomas', id: 'ECE001', attendance: '87%', status: 'Good' },
+                    { name: 'Leo Jackson', id: 'ECE002', attendance: '79%', status: 'Good' },
+                    { name: 'Mia White', id: 'ECE003', attendance: '91%', status: 'Excellent' },
+                    { name: 'Nathan Harris', id: 'ECE004', attendance: '68%', status: 'Warning' },
+                    { name: 'Olivia Martin', id: 'ECE005', attendance: '55%', status: 'Critical' }
+                ]
+            },
+            'CSE': {
+                totalStudents: 135,
+                attendanceRate: '90%',
+                absentToday: 5,
+                lowAttendance: 4,
+                students: [
+                    { name: 'Paul Thompson', id: 'CSE001', attendance: '96%', status: 'Excellent' },
+                    { name: 'Quinn Garcia', id: 'CSE002', attendance: '88%', status: 'Good' },
+                    { name: 'Rachel Martinez', id: 'CSE003', attendance: '83%', status: 'Good' },
+                    { name: 'Sam Robinson', id: 'CSE004', attendance: '75%', status: 'Good' },
+                    { name: 'Tina Clark', id: 'CSE005', attendance: '61%', status: 'Warning' }
+                ]
+            }
+        };
+
+        let currentDepartment = 'BBA';
+        let classChart = null;
+        let currentDate = new Date();
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = this.querySelector('input[type="password"]').value;
+            
+            // Simple password check (in real app, this would be server-side)
+            if (password.length >= 4) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                loadDepartmentData(currentDepartment);
+                renderCalendar();
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        });
+
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        function selectDepartment(dept) {
+            currentDepartment = dept;
+            loadDepartmentData(dept);
+        }
+
+        function loadDepartmentData(dept) {
+            const data = departmentData[dept];
+            
+            // Update overview
+            document.getElementById('departmentTitle').textContent = `${dept} Department Overview`;
+            document.getElementById('totalStudents').textContent = data.totalStudents;
+            document.getElementById('attendanceRate').textContent = data.attendanceRate;
+            document.getElementById('absentToday').textContent = data.absentToday;
+            document.getElementById('lowAttendance').textContent = data.lowAttendance;
+            
+            // Update student table
+            const tableBody = document.getElementById('studentTable');
+            tableBody.innerHTML = '';
+            
+            data.students.forEach(student => {
+                let statusClass = '';
+                if (student.status === 'Excellent') statusClass = 'text-green-600 bg-green-100';
+                else if (student.status === 'Good') statusClass = 'text-blue-600 bg-blue-100';
+                else if (student.status === 'Warning') statusClass = 'text-yellow-600 bg-yellow-100';
+                else statusClass = 'text-red-600 bg-red-100';
+                
+                const row = `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-4 py-3">${student.name}</td>
+                        <td class="px-4 py-3">${student.id}</td>
+                        <td class="px-4 py-3 font-semibold">${student.attendance}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs ${statusClass}">${student.status}</span>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            
+            // Update chart
+            updateClassChart(dept);
+        }
+
+        function updateClassChart(dept) {
+            const ctx = document.getElementById('classAttendanceChart').getContext('2d');
+            
+            if (classChart) {
+                classChart.destroy();
+            }
+            
+            // Sample data for different departments
+            const chartData = {
+                'BBA': [82, 85, 78, 88, 90, 83, 85],
+                'BCA': [85, 88, 90, 87, 89, 92, 88],
+                'ECE': [78, 82, 80, 85, 79, 83, 82],
+                'CSE': [88, 90, 92, 89, 91, 94, 90]
+            };
+            
+            classChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Attendance Percentage',
+                        data: chartData[dept],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCalendar() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const calendarDays = document.getElementById('calendarDays');
+            const calendarMonth = document.getElementById('calendarMonth');
+            
+            calendarMonth.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            let daysHtml = '';
+            
+            // Empty days before first day of month
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                daysHtml += '<div class="calendar-day p-2 text-center text-gray-400"></div>';
+            }
+            
+            // Days of the month
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                const isToday = dayDate.toDateString() === new Date().toDateString();
+                const attendance = Math.random() > 0.3 ? 'good' : (Math.random() > 0.5 ? 'average' : 'poor');
+                
+                let dayClass = 'calendar-day p-2 text-center rounded';
+                if (isToday) {
+                    dayClass += ' bg-blue-500 text-white font-semibold';
+                } else if (attendance === 'good') {
+                    dayClass += ' bg-green-100 text-green-800';
+                } else if (attendance === 'average') {
+                    dayClass += ' bg-yellow-100 text-yellow-800';
+                } else {
+                    dayClass += ' bg-red-100 text-red-800';
+                }
+                
+                daysHtml += `<div class="${dayClass}">${i}</div>`;
+            }
+            
+            calendarDays.innerHTML = daysHtml;
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // Initialize with BBA data
+        function init() {
+            // This will be called after login
+        }
+    </script>
+</body>
+</html>
